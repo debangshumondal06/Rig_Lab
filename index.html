@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <title>Rig Lab — code-controlled stick rig</title>
+         <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+         <div class="app">
+
+                  <header class="topbar">
+                           <div class="topbar-text">
+                                    <h1>Rig Lab</h1>
+                                    <p class="tagline">Write movement code on the right. The rig on the left performs
+                                             it, joint by joint.</p>
+                           </div>
+                  </header>
+
+                  <main class="workspace">
+
+                           <section class="stage-panel">
+                                    <div class="stage-frame">
+                                             <svg id="stage" viewBox="0 0 400 500"
+                                                      preserveAspectRatio="xMidYMid meet"></svg>
+                                    </div>
+                                    <div class="stage-controls">
+                                             <button id="runBtn" class="btn btn-primary">Run</button>
+                                             <button id="stopBtn" class="btn">Stop</button>
+                                             <button id="resetBtn" class="btn">Reset pose</button>
+                                    </div>
+                                    <div class="console" id="console" aria-live="polite"></div>
+                           </section>
+
+                           <section class="code-panel">
+                                    <div class="code-panel-head">
+                                             <label for="presetSelect">Sample moves</label>
+                                             <select id="presetSelect">
+                                                      <option value="wave">Wave hello</option>
+                                                      <option value="walk">Walk cycle</option>
+                                                      <option value="run">Run cycle</option>
+                                                      <option value="jump">Jump</option>
+                                                      <option value="backflip">Backflip</option>
+                                             </select>
+                                             <button id="loadPresetBtn" class="btn btn-small">Load sample</button>
+                                    </div>
+
+                                    <textarea id="codeInput" spellcheck="false" autocapitalize="off"
+                                             autocomplete="off"></textarea>
+
+                                    <details class="api-help">
+                                             <summary>Joint &amp; command reference</summary>
+                                             <div class="api-help-body">
+                                                      <p><strong>Joints</strong> (degrees, 0 = hanging straight
+                                                               down):<br>
+                                                               leftShoulder, rightShoulder, leftElbow, rightElbow,<br>
+                                                               leftHip, rightHip, leftKnee, rightKnee</p>
+                                                      <p><strong>Commands</strong> (all can be <code>await</code>ed):
+                                                      </p>
+                                                      <ul>
+                                                               <li><code>setJoints({ joint: angle, ... }, ms)</code> —
+                                                                        animate one or more joints together</li>
+                                                               <li><code>setBody({ x, y, rot }, ms)</code> — move /
+                                                                        rotate the whole rig (for jumps, flips)</li>
+                                                               <li><code>wait(ms)</code> — pause without moving</li>
+                                                               <li><code>resetPose(ms)</code> — return every joint and
+                                                                        the body to rest</li>
+                                                      </ul>
+                                                      <p>Ordinary JavaScript works too — <code>for</code> loops,
+                                                               variables, functions.</p>
+                                             </div>
+                                    </details>
+                           </section>
+
+                  </main>
+         </div>
+
+         <script src="script.js"></script>
+</body>
+
+</html>
