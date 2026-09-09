@@ -1,84 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-         <meta charset="UTF-8">
-         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-         <title>Rig Lab — code-controlled stick rig</title>
-         <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b111d">
+  <title>Rig Lab — animate a tiny character</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div>
+          <div class="eyebrow">PLAYGROUND / 01</div>
+          <h1>Rig Lab</h1>
+        </div>
+      </div>
+      <p class="tagline">Make a tiny character move with a few lines of JavaScript.</p>
+      <div class="topbar-badge"><span class="live-dot"></span> Browser-only · no setup</div>
+    </header>
 
-         <div class="app">
+    <main class="workspace">
+      <section class="stage-panel panel">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">THE STAGE</div>
+            <h2>Meet your rig</h2>
+          </div>
+          <div class="status-pill" id="statusPill"><span class="status-dot"></span><span id="statusText">Ready</span></div>
+        </div>
+        <div class="stage-frame">
+          <div class="stage-label stage-label-top">RIG_01 <span>●</span></div>
+          <div class="stage-label stage-label-bottom">x <strong id="xReadout">0</strong> &nbsp; y <strong id="yReadout">0</strong> &nbsp; rot <strong id="rotReadout">0°</strong></div>
+          <svg id="stage" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid meet" aria-label="Animated jointed rig"></svg>
+        </div>
+        <div class="stage-toolbar">
+          <div class="button-group">
+            <button id="runBtn" class="btn btn-primary"><span class="play-icon">▶</span> Run code <kbd>⌘↵</kbd></button>
+            <button id="stopBtn" class="btn btn-quiet">Stop</button>
+            <button id="resetBtn" class="btn btn-quiet">Reset pose</button>
+          </div>
+          <div class="hint"><span class="hint-key">TIP</span> Try changing one angle, then run it.</div>
+        </div>
+        <div class="console-wrap">
+          <div class="console-head"><span>RUN LOG</span><span id="logCount">0 events</span></div>
+          <div class="console" id="console" aria-live="polite"></div>
+        </div>
+      </section>
 
-                  <header class="topbar">
-                           <div class="topbar-text">
-                                    <h1>Rig Lab</h1>
-                                    <p class="tagline">Write movement code on the right. The rig on the left performs
-                                             it, joint by joint.</p>
-                           </div>
-                  </header>
-
-                  <main class="workspace">
-
-                           <section class="stage-panel">
-                                    <div class="stage-frame">
-                                             <svg id="stage" viewBox="0 0 400 500"
-                                                      preserveAspectRatio="xMidYMid meet"></svg>
-                                    </div>
-                                    <div class="stage-controls">
-                                             <button id="runBtn" class="btn btn-primary">Run</button>
-                                             <button id="stopBtn" class="btn">Stop</button>
-                                             <button id="resetBtn" class="btn">Reset pose</button>
-                                    </div>
-                                    <div class="console" id="console" aria-live="polite"></div>
-                           </section>
-
-                           <section class="code-panel">
-                                    <div class="code-panel-head">
-                                             <label for="presetSelect">Sample moves</label>
-                                             <select id="presetSelect">
-                                                      <option value="wave">Wave hello</option>
-                                                      <option value="walk">Walk cycle</option>
-                                                      <option value="run">Run cycle</option>
-                                                      <option value="jump">Jump</option>
-                                                      <option value="backflip">Backflip</option>
-                                             </select>
-                                             <button id="loadPresetBtn" class="btn btn-small">Load sample</button>
-                                    </div>
-
-                                    <textarea id="codeInput" spellcheck="false" autocapitalize="off"
-                                             autocomplete="off"></textarea>
-
-                                    <details class="api-help">
-                                             <summary>Joint &amp; command reference</summary>
-                                             <div class="api-help-body">
-                                                      <p><strong>Joints</strong> (degrees, 0 = hanging straight
-                                                               down):<br>
-                                                               leftShoulder, rightShoulder, leftElbow, rightElbow,<br>
-                                                               leftHip, rightHip, leftKnee, rightKnee</p>
-                                                      <p><strong>Commands</strong> (all can be <code>await</code>ed):
-                                                      </p>
-                                                      <ul>
-                                                               <li><code>setJoints({ joint: angle, ... }, ms)</code> —
-                                                                        animate one or more joints together</li>
-                                                               <li><code>setBody({ x, y, rot }, ms)</code> — move /
-                                                                        rotate the whole rig (for jumps, flips)</li>
-                                                               <li><code>wait(ms)</code> — pause without moving</li>
-                                                               <li><code>resetPose(ms)</code> — return every joint and
-                                                                        the body to rest</li>
-                                                      </ul>
-                                                      <p>Ordinary JavaScript works too — <code>for</code> loops,
-                                                               variables, functions.</p>
-                                             </div>
-                                    </details>
-                           </section>
-
-                  </main>
-         </div>
-
-         <script src="script.js"></script>
+      <section class="code-panel panel">
+        <div class="section-heading code-heading">
+          <div>
+            <div class="eyebrow">THE SCRIPT</div>
+            <h2>Direct the motion</h2>
+          </div>
+          <span class="language-badge">JS</span>
+        </div>
+        <div class="sample-row">
+          <label for="presetSelect">Start with a move</label>
+          <select id="presetSelect">
+            <option value="wave">Wave hello</option>
+            <option value="walk">Walk cycle</option>
+            <option value="run">Run cycle</option>
+            <option value="jump">Jump</option>
+            <option value="backflip">Backflip</option>
+          </select>
+          <button id="loadPresetBtn" class="btn btn-small">Load</button>
+        </div>
+        <div class="editor-shell">
+          <div class="editor-gutter" aria-hidden="true"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span><span>07</span><span>08</span><span>09</span><span>10</span><span>11</span><span>12</span></div>
+          <textarea id="codeInput" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Movement code"></textarea>
+        </div>
+        <div class="quick-actions">
+          <span>QUICK INSERT</span>
+          <button class="insert-chip" data-snippet="await setJoints({ rightShoulder: -120 }, 300);">setJoints</button>
+          <button class="insert-chip" data-snippet="await setBody({ y: -60 }, 300);">setBody</button>
+          <button class="insert-chip" data-snippet="await wait(300);">wait</button>
+        </div>
+        <details class="api-help">
+          <summary><span class="summary-icon">?</span> Joint &amp; command reference <span class="chevron">⌄</span></summary>
+          <div class="api-help-body">
+            <p><strong>Joints</strong> <span class="muted">degrees · 0 = straight down</span><br><code>leftShoulder</code> <code>rightShoulder</code> <code>leftElbow</code> <code>rightElbow</code><br><code>leftWrist</code> <code>rightWrist</code> <code>leftHip</code> <code>rightHip</code><br><code>leftKnee</code> <code>rightKnee</code> <code>leftAnkle</code> <code>rightAnkle</code></p>
+            <p><strong>Commands</strong><br><code>setJoints({ joint: angle }, ms)</code> · <code>setBody({ x, y, rot }, ms)</code><br><code>wait(ms)</code> · <code>resetPose(ms)</code></p>
+          </div>
+        </details>
+        <div class="footer-note"><span class="spark">✦</span> Your code runs locally in this tab. Nothing leaves your browser.</div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>RIG LAB / PROTOTYPE</span><span>Built for curious makers · 12 joints, infinite poses</span></footer>
+  </div>
+  <script src="script.js"></script>
 </body>
-
 </html>
