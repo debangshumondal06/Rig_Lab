@@ -111,7 +111,25 @@ const physicsToggle = document.getElementById("physicsToggle"), speedInput = doc
 function highlight(line = 0, error = false) { activeLine = line; gutter.querySelectorAll("span").forEach((s, i) => { s.classList.toggle("current", i + 1 === line && !error); s.classList.toggle("error", i + 1 === line && error); s.classList.toggle("completed", line > 0 && i + 1 < line); s.classList.toggle("upcoming", line > 0 && i + 1 > line); }); }
 function updateGutter() { const count = Math.max(16, codeInput.value.split("\n").length); gutter.innerHTML = Array.from({length:count}, (_,i) => `<span>${String(i+1).padStart(2,"0")}</span>`).join(""); highlight(activeLine); }
 async function __line(line, text) { while (paused) { await new Promise(r => requestAnimationFrame(r)); if (stopRequested) throw new Error("Stopped"); } if (stepBudget) { stepBudget--; paused = true; syncPause(); } activeLine = line; highlight(line); commandCount++; log(`Line ${line}: ${text}`, "command"); }
-function instrument(source) { return source.split("\n").map((line,i) => { const t=line.trim(); return !t || t.startsWith("//") ? line : `await __line(${i+1}, ${JSON.stringify(t.slice(0,80))});${line}`; }).join("\n"); }
+function instrument(source) {
+  const lines = source.split("\n"), out = [];
+  const commandStart = /^(await\s+|(?:setJoint|setJoints|setPose|setBody|move|rotate|wait|jump|wave|walk|resetPose|physics|impulse)\s*\()/;
+  for (let i = 0; i < lines.length; i++) {
+    const first = lines[i], trimmed = first.trim();
+    if (!trimmed || trimmed.startsWith("//") || !commandStart.test(trimmed)) { out.push(first); continue; }
+    let block = first, depth = 0, started = false;
+    const count = (text, char) => (text.match(new RegExp("\\" + char, "g")) || []).length;
+    for (;;) {
+      depth += count(lines[i], "{") - count(lines[i], "}") + count(lines[i], "(") - count(lines[i], ")") + count(lines[i], "[") - count(lines[i], "]");
+      started = started || /[({[]/.test(lines[i]);
+      if (depth <= 0 && started && /;\s*$/.test(lines[i].trim())) break;
+      if (i + 1 >= lines.length) break;
+      block += "\n" + lines[++i];
+    }
+    out.push(`await __line(${i - (block.split("\n").length - 1) + 1}, ${JSON.stringify(trimmed.slice(0,80))});${block}`);
+  }
+  return out.join("\n");
+}
 function syncPause() { pauseBtn.textContent = paused ? "Resume" : "Pause"; pauseBtn.classList.toggle("btn-primary", paused); pauseBtn.classList.toggle("btn-quiet", !paused); }
 async function runUserCode() { if (running) return; if (languageSelect.value !== "javascript") { log("Python execution is not implemented. Choose JavaScript; this app will not fake Python.", "error"); setStatus("JavaScript only"); return; } running=true; stopRequested=false; paused=false; stepBudget=0; commandCount=0; runStartedAt=performance.now(); runBtn.disabled=true; pauseBtn.disabled=false; stepBtn.disabled=false; setStatus("Running","running"); clearLog(); log("JavaScript controller started."); try { const factory = new Function("setJoints","setJoint","setPose","setBody","move","rotate","wait","resetPose","physics","impulse","jump","wave","walk","__line", `return (async()=>{\n${instrument(codeInput.value)}\n})();`); await factory(setJoints,setJoint,setPose,setBody,move,rotate,wait,resetPose,physics,impulse,jump,wave,walk,__line); log(`Sequence complete · ${commandCount} commands · ${Math.round(performance.now()-runStartedAt)} ms`,"ok"); setStatus("Done","done"); highlight(0); } catch(err) { if(err.message === "Stopped") { log(`Stopped after ${commandCount} commands.`,"error"); setStatus("Ready"); } else { highlight(activeLine,true); log(`Error on line ${activeLine || "?"}: ${err.message || err}`,"error"); log("Suggestion: check the command name, joint name, angle, or duration.","error"); setStatus("Script error"); } } finally { running=false; paused=false; stepBudget=0; runBtn.disabled=false; pauseBtn.disabled=true; stepBtn.disabled=true; syncPause(); } }
 runBtn.addEventListener("click",runUserCode); pauseBtn.addEventListener("click",()=>{if(!running)return; paused=!paused; syncPause(); setStatus(paused?"Paused":"Running","running"); log(paused?"Playback paused.":"Playback resumed.");}); stepBtn.addEventListener("click",()=>{if(!running||!paused)return; stepBudget=1; paused=false; syncPause(); log("Stepping one command.");}); stopBtn.addEventListener("click",()=>{if(running){stopRequested=true;paused=false;setStatus("Stopping","running");}}); resetBtn.addEventListener("click",async()=>{stopRequested=true;paused=false;await new Promise(r=>setTimeout(r,0));stopRequested=false;try{await resetPose(250);}catch(_){} highlight(0);setStatus("Ready");log("Pose reset.","ok");});

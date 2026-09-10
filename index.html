@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,12 @@
   <title>Rig Lab by Debangshu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <div class="app-shell">
     <header class="topbar">
@@ -21,7 +25,11 @@
         </div>
       </div>
       <p class="tagline">Make a character move with a few lines of code!</p>
-      <div class="header-actions"><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark theme"><span class="theme-icon">☾</span><span id="themeLabel">Dark mode</span></button><div class="topbar-badge"><span class="live-dot"></span> Browser-only · no setup</div></div>
+      <div class="header-actions"><button id="themeToggle" class="theme-toggle" type="button"
+          aria-label="Switch to dark theme"><span class="theme-icon">☾</span><span id="themeLabel">Dark
+            mode</span></button>
+        <div class="topbar-badge"><span class="live-dot"></span> Browser-only · no setup</div>
+      </div>
     </header>
 
     <main class="workspace">
@@ -31,13 +39,16 @@
             <div class="eyebrow">THE STAGE</div>
             <h2>Meet your rig</h2>
           </div>
-          <div class="status-pill" id="statusPill"><span class="status-dot"></span><span id="statusText">Ready</span></div>
+          <div class="status-pill" id="statusPill"><span class="status-dot"></span><span id="statusText">Ready</span>
+          </div>
         </div>
         <div class="stage-frame">
           <div class="stage-label stage-label-top">Meet your RIG<span>●</span></div>
-          <div class="stage-label stage-label-bottom">x <strong id="xReadout">0</strong> &nbsp; y <strong id="yReadout">0</strong> &nbsp; rot <strong id="rotReadout">0°</strong></div>
+          <div class="stage-label stage-label-bottom">x <strong id="xReadout">0</strong> &nbsp; y <strong
+              id="yReadout">0</strong> &nbsp; rot <strong id="rotReadout">0°</strong></div>
           <div class="pose-hint" id="poseHint"><span>✦</span>Drag the yellow joints to pose//</div>
-          <svg id="stage" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid meet" aria-label="Animated jointed rig"></svg>
+          <svg id="stage" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid meet"
+            aria-label="Animated jointed rig"></svg>
         </div>
         <div class="stage-toolbar">
           <div class="button-group">
@@ -48,8 +59,10 @@
             <button id="resetBtn" class="btn btn-quiet">Reset pose</button>
           </div>
           <div class="motion-controls">
-            <label class="physics-toggle"><input id="physicsToggle" type="checkbox" checked><span class="toggle-track"><span></span></span><span>Physics</span></label>
-            <label class="speed-control" for="speedInput">Speed <input id="speedInput" type="range" min="0.5" max="2" step="0.1" value="1"><strong id="speedValue">1×</strong></label>
+            <label class="physics-toggle"><input id="physicsToggle" type="checkbox" checked><span
+                class="toggle-track"><span></span></span><span>Physics</span></label>
+            <label class="speed-control" for="speedInput">Speed <input id="speedInput" type="range" min="0.5" max="2"
+                step="0.1" value="1"><strong id="speedValue">1×</strong></label>
           </div>
         </div>
         <div class="console-wrap">
@@ -64,7 +77,10 @@
             <div class="eyebrow">THE SCRIPT</div>
             <h2>Direct the motion:</h2>
           </div>
-          <div class="language-picker"><label for="languageSelect">CODE IN</label><select id="languageSelect"><option value="javascript">JavaScript</option><option value="python">Python</option></select></div>
+          <div class="language-picker"><label for="languageSelect">CODE IN</label><select id="languageSelect">
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+            </select></div>
         </div>
         <div class="sample-row">
           <label for="presetSelect">Start with a move</label>
@@ -78,54 +94,92 @@
           <button id="loadPresetBtn" class="btn btn-small">Load</button>
         </div>
         <div class="editor-shell">
-          <div class="editor-gutter" aria-hidden="true"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span><span>07</span><span>08</span><span>09</span><span>10</span><span>11</span><span>12</span></div>
-          <textarea id="codeInput" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Movement code"></textarea>
+          <div class="editor-gutter" aria-hidden="true">
+            <span>01</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span><span>07</span><span>08</span><span>09</span><span>10</span><span>11</span><span>12</span>
+          </div>
+          <textarea id="codeInput" spellcheck="false" autocapitalize="off" autocomplete="off"
+            aria-label="Movement code"></textarea>
         </div>
         <div class="quick-actions">
           <span>QUICK INSERT</span>
           <button class="insert-chip" data-snippet="await setJoints({ rightShoulder: -120 }, 300);">setJoints</button>
           <button class="insert-chip" data-snippet="await setBody({ y: -60 }, 300);">setBody</button>
           <button class="insert-chip" data-snippet="await wait(300);">wait</button>
-          <button class="insert-chip physics-chip" data-snippet="physics({ gravity: 0.18, bounce: 0.42 });">physics</button>
+          <button class="insert-chip physics-chip"
+            data-snippet="physics({ gravity: 0.18, bounce: 0.42 });">physics</button>
         </div>
         <div class="timeline-panel">
           <div class="timeline-head"><span>POSE TIMELINE</span><span id="keyframeCount">0 keyframes</span></div>
-          <div class="timeline-actions"><button id="addKeyframeBtn" class="timeline-btn">＋ Add pose</button><button id="playTimelineBtn" class="timeline-btn timeline-play">▶ Play timeline</button><button id="clearTimelineBtn" class="timeline-btn timeline-clear">Clear</button></div>
-          <div class="timeline-track" id="timelineTrack"><span class="timeline-empty">Add poses from the stage to build a sequence.</span></div>
+          <div class="timeline-actions"><button id="addKeyframeBtn" class="timeline-btn">＋ Add pose</button><button
+              id="playTimelineBtn" class="timeline-btn timeline-play">▶ Play timeline</button><button
+              id="clearTimelineBtn" class="timeline-btn timeline-clear">Clear</button></div>
+          <div class="timeline-track" id="timelineTrack"><span class="timeline-empty">Add poses from the stage to build
+              a sequence.</span></div>
         </div>
-        <div class="code-help-actions"><button id="codeHelpBtn" class="code-help-btn" type="button" aria-expanded="false" aria-controls="codeHelpPanel"><span class="summary-icon">?</span> Code help <span class="chevron">⌄</span></button></div>
+        <div class="code-help-actions"><button id="codeHelpBtn" class="code-help-btn" type="button"
+            aria-expanded="false" aria-controls="codeHelpPanel"><span class="summary-icon">?</span> Code help <span
+              class="chevron">⌄</span></button></div>
         <details class="api-help" id="apiHelpDetails">
-          <summary><span class="summary-icon">?</span> Joint &amp; command reference <span class="chevron">⌄</span></summary>
+          <summary><span class="summary-icon">?</span> Joint &amp; command reference <span class="chevron">⌄</span>
+          </summary>
           <div class="api-help-body">
-            <p><strong>Joints</strong> <span class="muted">degrees · 0 = straight down</span><br><code>spine</code> <code>leftShoulder</code> <code>rightShoulder</code> <code>leftElbow</code> <code>rightElbow</code><br><code>leftWrist</code> <code>rightWrist</code> <code>leftHip</code> <code>rightHip</code><br><code>leftKnee</code> <code>rightKnee</code> <code>leftAnkle</code> <code>rightAnkle</code></p>
-            <p><strong>Commands</strong><br><code>setJoints({ joint: angle }, ms)</code> · <code>setBody({ x, y, rot }, ms)</code><br><code>physics({ gravity, bounce, stiffness, damping })</code> · <code>impulse({ x, y })</code><br><code>wait(ms)</code> · <code>resetPose(ms)</code></p>
+            <p><strong>Joints</strong> <span class="muted">degrees · 0 = straight down</span><br><code>spine</code>
+              <code>leftShoulder</code> <code>rightShoulder</code> <code>leftElbow</code>
+              <code>rightElbow</code><br><code>leftWrist</code> <code>rightWrist</code> <code>leftHip</code>
+              <code>rightHip</code><br><code>leftKnee</code> <code>rightKnee</code> <code>leftAnkle</code>
+              <code>rightAnkle</code></p>
+            <p><strong>Commands</strong><br><code>setJoints({ joint: angle }, ms)</code> ·
+              <code>setBody({ x, y, rot }, ms)</code><br><code>physics({ gravity, bounce, stiffness, damping })</code> ·
+              <code>impulse({ x, y })</code><br><code>wait(ms)</code> · <code>resetPose(ms)</code></p>
           </div>
         </details>
         <div class="code-help-panel" id="codeHelpPanel" hidden>
-          <div class="code-help-panel-head"><div><div class="eyebrow">CODE → MOTION</div><strong>Try a movement pattern</strong></div><button id="closeCodeHelpBtn" class="code-help-close" type="button" aria-label="Close code help">×</button></div>
-          <p class="code-help-intro">These small JavaScript demos show how to move one part, pose several parts, and combine motion with timing. Click <strong>Use demo</strong> to load one into the editor.</p>
+          <div class="code-help-panel-head">
+            <div>
+              <div class="eyebrow">CODE → MOTION</div><strong>Try a movement pattern</strong>
+            </div><button id="closeCodeHelpBtn" class="code-help-close" type="button"
+              aria-label="Close code help">×</button>
+          </div>
+          <p class="code-help-intro">These small JavaScript demos show how to move one part, pose several parts, and
+            combine motion with timing. Click <strong>Use demo</strong> to load one into the editor.</p>
           <div class="code-demo-list">
-            <article class="code-demo"><div class="code-demo-meta"><strong>Move one joint</strong><span>ARM</span></div><pre><code>await setJoint("rightShoulder", -120, 400);
-await setJoint("rightElbow", 35, 300);</code></pre><button class="use-demo-btn" data-demo="individual">Use demo</button></article>
-            <article class="code-demo"><div class="code-demo-meta"><strong>Pose several joints</strong><span>POSE</span></div><pre><code>await setPose({
+            <article class="code-demo">
+              <div class="code-demo-meta"><strong>Move one joint</strong><span>ARM</span></div>
+              <pre><code>await setJoint("rightShoulder", -120, 400);
+await setJoint("rightElbow", 35, 300);</code></pre><button class="use-demo-btn" data-demo="individual">Use
+                demo</button>
+            </article>
+            <article class="code-demo">
+              <div class="code-demo-meta"><strong>Pose several joints</strong><span>POSE</span></div>
+              <pre><code>await setPose({
   leftShoulder: -40,
   rightShoulder: 120,
   rightElbow: 45
-}, 500);</code></pre><button class="use-demo-btn" data-demo="pose">Use demo</button></article>
-            <article class="code-demo"><div class="code-demo-meta"><strong>Sequence with timing</strong><span>FLOW</span></div><pre><code>await wave();
+}, 500);</code></pre><button class="use-demo-btn" data-demo="pose">Use demo</button>
+            </article>
+            <article class="code-demo">
+              <div class="code-demo-meta"><strong>Sequence with timing</strong><span>FLOW</span></div>
+              <pre><code>await wave();
 await wait(300);
 await jump();
-await resetPose(400);</code></pre><button class="use-demo-btn" data-demo="sequence">Use demo</button></article>
-            <article class="code-demo"><div class="code-demo-meta"><strong>Move body and rotate</strong><span>BODY</span></div><pre><code>await move(40, -30, 500);
+await resetPose(400);</code></pre><button class="use-demo-btn" data-demo="sequence">Use demo</button>
+            </article>
+            <article class="code-demo">
+              <div class="code-demo-meta"><strong>Move body and rotate</strong><span>BODY</span></div>
+              <pre><code>await move(40, -30, 500);
 await rotate(25, 400);
-await resetPose(400);</code></pre><button class="use-demo-btn" data-demo="body">Use demo</button></article>
+await resetPose(400);</code></pre><button class="use-demo-btn" data-demo="body">Use demo</button>
+            </article>
           </div>
         </div>
-        <div class="footer-note"><span class="spark">✦</span> Your code runs locally in this tab. Nothing leaves your browser.</div>
+        <div class="footer-note"><span class="spark">✦</span> Your code runs locally in this tab. Nothing leaves your
+          browser.</div>
       </section>
     </main>
-    <footer class="site-footer"><span>RIG LAB / Made by Debangshu</span><span>Built for curious makers · 13 joints, infinite poses!</span></footer>
+    <footer class="site-footer"><span>RIG LAB / Made by Debangshu</span><span>Built for curious makers · 13 joints,
+        infinite poses!</span></footer>
   </div>
   <script src="script.js"></script>
 </body>
+
 </html>
