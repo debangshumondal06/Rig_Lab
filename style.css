@@ -78,3 +78,33 @@ button, select { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 950px) { .app-shell { padding: 0 16px 10px; }.topbar { flex-basis: 76px; gap: 15px; flex-wrap: wrap; padding: 12px 0; }.tagline { order: 3; flex-basis: 100%; }.topbar-badge { margin-left: auto; }.workspace { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); overflow-y: auto; }.stage-frame, #stage { min-height: 0; }.editor-shell, .editor-shell textarea { min-height: 0; } }
 @media (max-width: 520px) { .topbar-badge { display: none; }.app-shell { padding: 0 10px 8px; }.topbar h1 { font-size: 26px; }.tagline { font-size: 14px; line-height: 1.35; }.workspace { grid-template-rows: minmax(0, 1.2fr) minmax(0, .8fr); }.stage-panel, .code-panel { padding: 12px; border-radius: 13px; }.section-heading h2 { font-size: 20px; }.sample-row { grid-template-columns: 1fr auto; }.sample-row label { grid-column: 1 / -1; }.stage-toolbar { gap: 6px; }.hint, .console-wrap, .code-panel .api-help, .code-panel .footer-note, .timeline-panel { display: none; }.site-footer { flex-direction: column; gap: 6px; font-size: 10px; padding-top: 10px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+
+.editor-gutter span.current { color: var(--ink); background: rgba(99,230,212,.24); border-left: 2px solid var(--cyan); }
+.editor-gutter span.completed { color: var(--cyan); }
+.editor-gutter span.upcoming { color: var(--muted-2); opacity: .68; }
+.editor-gutter span.error { color: var(--red); background: rgba(255,126,121,.18); border-left: 2px solid var(--red); }
+.console .line.command { color: var(--yellow); }
+
+.editor-gutter span.current { color: var(--ink); background: rgba(99,230,212,.24); border-left: 2px solid var(--cyan); }
+.editor-gutter span.completed { color: var(--cyan); }
+.editor-gutter span.upcoming { color: var(--muted-2); opacity: .68; }
+.editor-gutter span.error { color: var(--red); background: rgba(255,126,121,.18); border-left: 2px solid var(--red); }
+.console .line.command { color: var(--yellow); }
+
+.editor-gutter span.current { color: var(--ink); background: rgba(99,230,212,.24); border-left: 2px solid var(--cyan); }
+.editor-gutter span.completed { color: var(--cyan); }
+.editor-gutter span.upcoming { color: var(--muted-2); opacity: .68; }
+.editor-gutter span.error { color: var(--red); background: rgba(255,126,121,.18); border-left: 2px solid var(--red); }
+.console .line.command { color: var(--yellow); }
+
+.editor-gutter span.current { color: var(--ink); background: rgba(99,230,212,.24); border-left: 2px solid var(--cyan); }
+.editor-gutter span.completed { color: var(--cyan); }
+.editor-gutter span.upcoming { color: var(--muted-2); opacity: .68; }
+.editor-gutter span.error { color: var(--red); background: rgba(255,126,121,.18); border-left: 2px solid var(--red); }
+.console .line.command { color: var(--yellow); }
+
+.editor-gutter span.current { color: var(--ink); background: rgba(99,230,212,.24); border-left: 2px solid var(--cyan); }
+.editor-gutter span.completed { color: var(--cyan); }
+.editor-gutter span.upcoming { color: var(--muted-2); opacity: .68; }
+.editor-gutter span.error { color: var(--red); background: rgba(255,126,121,.18); border-left: 2px solid var(--red); }
+.console .line.command { color: var(--yellow); }
