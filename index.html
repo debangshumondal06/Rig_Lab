@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0b111d">
-  <title>Rig Lab — kinematics coder</title>
+  <title>Rig Lab by Debangshu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -20,8 +20,8 @@
           <h1>Rig Lab</h1>
         </div>
       </div>
-      <p class="tagline">Make a character move with a few lines of JavaScript.</p>
-      <div class="topbar-badge"><span class="live-dot"></span> Browser-only · no setup</div>
+      <p class="tagline">Make a character move with a few lines of code!</p>
+      <div class="header-actions"><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark theme"><span class="theme-icon">☾</span><span id="themeLabel">Dark mode</span></button><div class="topbar-badge"><span class="live-dot"></span> Browser-only · no setup</div></div>
     </header>
 
     <main class="workspace">
@@ -34,8 +34,9 @@
           <div class="status-pill" id="statusPill"><span class="status-dot"></span><span id="statusText">Ready</span></div>
         </div>
         <div class="stage-frame">
-          <div class="stage-label stage-label-top">RIG_01 <span>●</span></div>
+          <div class="stage-label stage-label-top">Meet your RIG<span>●</span></div>
           <div class="stage-label stage-label-bottom">x <strong id="xReadout">0</strong> &nbsp; y <strong id="yReadout">0</strong> &nbsp; rot <strong id="rotReadout">0°</strong></div>
+          <div class="pose-hint" id="poseHint"><span>✦</span>Drag the yellow joints to pose//</div>
           <svg id="stage" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid meet" aria-label="Animated jointed rig"></svg>
         </div>
         <div class="stage-toolbar">
@@ -44,7 +45,10 @@
             <button id="stopBtn" class="btn btn-quiet">Stop</button>
             <button id="resetBtn" class="btn btn-quiet">Reset pose</button>
           </div>
-          <div class="hint"><span class="hint-key">TIP</span> Try changing one angle, then run it.</div>
+          <div class="motion-controls">
+            <label class="physics-toggle"><input id="physicsToggle" type="checkbox" checked><span class="toggle-track"><span></span></span><span>Physics</span></label>
+            <label class="speed-control" for="speedInput">Speed <input id="speedInput" type="range" min="0.5" max="2" step="0.1" value="1"><strong id="speedValue">1×</strong></label>
+          </div>
         </div>
         <div class="console-wrap">
           <div class="console-head"><span>RUN LOG</span><span id="logCount">0 events</span></div>
@@ -56,9 +60,9 @@
         <div class="section-heading code-heading">
           <div>
             <div class="eyebrow">THE SCRIPT</div>
-            <h2>Direct the motion</h2>
+            <h2>Direct the motion:</h2>
           </div>
-          <span class="language-badge">JS</span>
+          <div class="language-picker"><label for="languageSelect">CODE IN</label><select id="languageSelect"><option value="javascript">JavaScript</option><option value="python">Python</option></select></div>
         </div>
         <div class="sample-row">
           <label for="presetSelect">Start with a move</label>
@@ -80,18 +84,24 @@
           <button class="insert-chip" data-snippet="await setJoints({ rightShoulder: -120 }, 300);">setJoints</button>
           <button class="insert-chip" data-snippet="await setBody({ y: -60 }, 300);">setBody</button>
           <button class="insert-chip" data-snippet="await wait(300);">wait</button>
+          <button class="insert-chip physics-chip" data-snippet="physics({ gravity: 0.18, bounce: 0.42 });">physics</button>
+        </div>
+        <div class="timeline-panel">
+          <div class="timeline-head"><span>POSE TIMELINE</span><span id="keyframeCount">0 keyframes</span></div>
+          <div class="timeline-actions"><button id="addKeyframeBtn" class="timeline-btn">＋ Add pose</button><button id="playTimelineBtn" class="timeline-btn timeline-play">▶ Play timeline</button><button id="clearTimelineBtn" class="timeline-btn timeline-clear">Clear</button></div>
+          <div class="timeline-track" id="timelineTrack"><span class="timeline-empty">Add poses from the stage to build a sequence.</span></div>
         </div>
         <details class="api-help">
           <summary><span class="summary-icon">?</span> Joint &amp; command reference <span class="chevron">⌄</span></summary>
           <div class="api-help-body">
-            <p><strong>Joints</strong> <span class="muted">degrees · 0 = straight down</span><br><code>leftShoulder</code> <code>rightShoulder</code> <code>leftElbow</code> <code>rightElbow</code><br><code>leftWrist</code> <code>rightWrist</code> <code>leftHip</code> <code>rightHip</code><br><code>leftKnee</code> <code>rightKnee</code> <code>leftAnkle</code> <code>rightAnkle</code></p>
-            <p><strong>Commands</strong><br><code>setJoints({ joint: angle }, ms)</code> · <code>setBody({ x, y, rot }, ms)</code><br><code>wait(ms)</code> · <code>resetPose(ms)</code></p>
+            <p><strong>Joints</strong> <span class="muted">degrees · 0 = straight down</span><br><code>spine</code> <code>leftShoulder</code> <code>rightShoulder</code> <code>leftElbow</code> <code>rightElbow</code><br><code>leftWrist</code> <code>rightWrist</code> <code>leftHip</code> <code>rightHip</code><br><code>leftKnee</code> <code>rightKnee</code> <code>leftAnkle</code> <code>rightAnkle</code></p>
+            <p><strong>Commands</strong><br><code>setJoints({ joint: angle }, ms)</code> · <code>setBody({ x, y, rot }, ms)</code><br><code>physics({ gravity, bounce, stiffness, damping })</code> · <code>impulse({ x, y })</code><br><code>wait(ms)</code> · <code>resetPose(ms)</code></p>
           </div>
         </details>
         <div class="footer-note"><span class="spark">✦</span> Your code runs locally in this tab. Nothing leaves your browser.</div>
       </section>
     </main>
-    <footer class="site-footer"><span>RIG LAB / Made by Debangshu</span><span>Built for curious makers · 12 joints, infinite poses</span></footer>
+    <footer class="site-footer"><span>RIG LAB / Made by Debangshu</span><span>Built for curious makers · 13 joints, infinite poses!</span></footer>
   </div>
   <script src="script.js"></script>
 </body>
