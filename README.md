@@ -2,16 +2,6 @@
 
 Rig Lab is a zero-install browser playground for directing a tiny jointed character with JavaScript or the included Python command dialect. Write a movement sequence, run it locally, and watch the rig respond joint by joint.
 
-## Run it
-
-Open `index.html` directly in a browser, or use the included Python server:
-
-```bash
-python3 -m http.server 4173
-```
-
-Then visit <http://localhost:4173>.
-
 ## Controls
 
 - **Run code** executes the script in the editor. `⌘/Ctrl + Enter` is a shortcut.
