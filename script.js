@@ -117,5 +117,32 @@ async function runUserCode() { if (running) return; if (languageSelect.value !==
 runBtn.addEventListener("click",runUserCode); pauseBtn.addEventListener("click",()=>{if(!running)return; paused=!paused; syncPause(); setStatus(paused?"Paused":"Running","running"); log(paused?"Playback paused.":"Playback resumed.");}); stepBtn.addEventListener("click",()=>{if(!running||!paused)return; stepBudget=1; paused=false; syncPause(); log("Stepping one command.");}); stopBtn.addEventListener("click",()=>{if(running){stopRequested=true;paused=false;setStatus("Stopping","running");}}); resetBtn.addEventListener("click",async()=>{stopRequested=true;paused=false;await new Promise(r=>setTimeout(r,0));stopRequested=false;try{await resetPose(250);}catch(_){} highlight(0);setStatus("Ready");log("Pose reset.","ok");});
 codeInput.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){e.preventDefault();runUserCode();}if(e.key==="Tab"){e.preventDefault();const s=codeInput.selectionStart;codeInput.value=codeInput.value.slice(0,s)+"  "+codeInput.value.slice(codeInput.selectionEnd);codeInput.selectionStart=codeInput.selectionEnd=s+2;updateGutter();}}); codeInput.addEventListener("input",updateGutter);
 const PRESETS = { wave:`// WAVE HELLO\nawait wave();\nawait resetPose(300);`, jump:`// JUMP\nawait jump();\nawait resetPose(300);`, combo:`// COMBO\nawait wave();\nawait wait(500);\nawait jump();\nawait resetPose(300);`, loop:`// LOOPED WAVES\nfor(let i=0;i<3;i++){ await wave(); }\nawait resetPose(300);`, walk:`// WALK\nawait walk();\nawait resetPose(300);` };
-const presetSelect=document.getElementById("presetSelect"); document.getElementById("loadPresetBtn").addEventListener("click",()=>{const key=presetSelect.value;if(PRESETS[key]){codeInput.value=PRESETS[key];updateGutter();codeInput.focus();log("Example loaded.");}}); document.querySelectorAll(".insert-chip").forEach(chip=>chip.addEventListener("click",()=>{const s=codeInput.selectionStart, snippet=chip.dataset.snippet;codeInput.value=codeInput.value.slice(0,s)+snippet+codeInput.value.slice(codeInput.selectionEnd);codeInput.selectionStart=codeInput.selectionEnd=s+snippet.length;updateGutter();codeInput.focus();})); languageSelect.addEventListener("change",()=>log(languageSelect.value==="python"?"Python is display-only; choose JavaScript for real execution.":"JavaScript mode selected.",languageSelect.value==="python"?"error":"")); codeInput.value=PRESETS.wave;updateGutter();syncPause();pauseBtn.disabled=true;stepBtn.disabled=true;log("Ready. JavaScript runs locally in this tab.");
+const presetSelect=document.getElementById("presetSelect"); document.getElementById("loadPresetBtn").addEventListener("click",()=>{const key=presetSelect.value;if(PRESETS[key]){codeInput.value=PRESETS[key];updateGutter();codeInput.focus();log("Example loaded.");}}); document.querySelectorAll(".insert-chip").forEach(chip=>chip.addEventListener("click",()=>{const s=codeInput.selectionStart, snippet=chip.dataset.snippet;codeInput.value=codeInput.value.slice(0,s)+snippet+codeInput.value.slice(codeInput.selectionEnd);codeInput.selectionStart=codeInput.selectionEnd=s+snippet.length;updateGutter();codeInput.focus();})); languageSelect.addEventListener("change",()=>log(languageSelect.value==="python"?"Python is display-only; choose JavaScript for real execution.":"JavaScript mode selected.",languageSelect.value==="python"?"error":"")); const CODE_DEMOS = {
+  individual: `// MOVE INDIVIDUAL JOINTS
+await setJoint("rightShoulder", -120, 400);
+await setJoint("rightElbow", 35, 300);
+await resetPose(400);`,
+  pose: `// POSE SEVERAL JOINTS
+await setPose({
+  leftShoulder: -40,
+  rightShoulder: 120,
+  rightElbow: 45
+}, 500);
+await resetPose(400);`,
+  sequence: `// SEQUENCE WITH TIMING
+await wave();
+await wait(300);
+await jump();
+await resetPose(400);`,
+  body: `// MOVE BODY AND ROTATE
+await move(40, -30, 500);
+await rotate(25, 400);
+await resetPose(400);`
+};
+const codeHelpBtn = document.getElementById("codeHelpBtn"), codeHelpPanel = document.getElementById("codeHelpPanel"), closeCodeHelpBtn = document.getElementById("closeCodeHelpBtn");
+function setCodeHelp(open) { codeHelpPanel.hidden = !open; codeHelpBtn.setAttribute("aria-expanded", String(open)); }
+codeHelpBtn.addEventListener("click", () => setCodeHelp(codeHelpPanel.hidden));
+closeCodeHelpBtn.addEventListener("click", () => setCodeHelp(false));
+document.querySelectorAll(".use-demo-btn").forEach((button) => button.addEventListener("click", () => { const demo = CODE_DEMOS[button.dataset.demo]; if (!demo) return; codeInput.value = demo; updateGutter(); codeInput.focus(); setCodeHelp(false); log("Code help demo loaded into the editor.", "ok"); }));
+codeInput.value=PRESETS.wave;updateGutter();syncPause();pauseBtn.disabled=true;stepBtn.disabled=true;log("Ready. JavaScript runs locally in this tab.");
 window.RigLab={setJoint,setPose,setBody,wait,move,rotate,jump,wave,walk,resetPose,physics,runUserCode};
