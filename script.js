@@ -118,7 +118,7 @@ function instrument(source) {
     const first = lines[i], trimmed = first.trim();
     if (!trimmed || trimmed.startsWith("//") || !commandStart.test(trimmed)) { out.push(first); continue; }
     let block = first, depth = 0, started = false;
-    const count = (text, char) => (text.match(new RegExp("\\" + char, "g")) || []).length;
+    const count = (value, char) => (value.match(new RegExp("\\" + char, "g")) || []).length;
     for (;;) {
       depth += count(lines[i], "{") - count(lines[i], "}") + count(lines[i], "(") - count(lines[i], ")") + count(lines[i], "[") - count(lines[i], "]");
       started = started || /[({[]/.test(lines[i]);
@@ -130,12 +130,81 @@ function instrument(source) {
   }
   return out.join("\n");
 }
+
+// Python mode is intentionally a small, deterministic command dialect. It translates
+// user-entered commands to the same local animation API; no code is sent to a server.
+const PYTHON_COMMANDS = {
+  set_joints: "setJoints", set_joint: "setJoint", set_pose: "setPose", set_body: "setBody",
+  reset_pose: "resetPose", wait: "wait", physics: "physics", impulse: "impulse",
+  move: "move", rotate: "rotate", jump: "jump", wave: "wave", walk: "walk"
+};
+function pythonLiteral(value) {
+  return value.trim().replace(/\bTrue\b/g, "true").replace(/\bFalse\b/g, "false").replace(/\bNone\b/g, "null").replace(/'/g, '"');
+}
+function translatePython(source) {
+  const input = source.split("\n"), output = [], lineMap = [], indentStack = [0];
+  const closeTo = (indent) => { while (indentStack.length > 1 && indent < indentStack[indentStack.length - 1]) { output.push("}"); indentStack.pop(); } };
+  for (let index = 0; index < input.length; index++) {
+    const raw = input[index], trimmed = raw.trim(), indent = raw.match(/^\s*/)[0].length;
+    if (!trimmed || trimmed.startsWith("#")) { output.push(trimmed.startsWith("#") ? `//${trimmed.slice(1)}` : ""); lineMap.push(index + 1); continue; }
+    closeTo(indent);
+    const loop = trimmed.match(/^for\s+(\w+)\s+in\s+range\((\d+)\)\s*:\s*$/);
+    if (loop) { output.push(`for (let ${loop[1]} = 0; ${loop[1]} < ${loop[2]}; ${loop[1]}++) {`); lineMap.push(index + 1); indentStack.push(indent + 1); continue; }
+    const command = trimmed.replace(/^await\s+/, "").replace(/;$/, "");
+    const match = command.match(/^([a-z_]+)\s*\((.*)\)\s*$/);
+    if (!match || !PYTHON_COMMANDS[match[1]]) throw new Error(`Unsupported Python syntax on line ${index + 1}. Use the command reference below.`);
+    const jsName = PYTHON_COMMANDS[match[1]], args = pythonLiteral(match[2]);
+    // The translated argument list is valid JavaScript after literal conversion;
+    // validation is performed by the shared movement API (and supports dict + duration).
+    const jsArgs = args;
+    output.push(`await __line(${index + 1}, ${JSON.stringify(trimmed)});await ${jsName}(${jsArgs});`);
+    lineMap.push(index + 1);
+  }
+  closeTo(0);
+  return { source: output.join("\n"), lineMap };
+}
 function syncPause() { pauseBtn.textContent = paused ? "Resume" : "Pause"; pauseBtn.classList.toggle("btn-primary", paused); pauseBtn.classList.toggle("btn-quiet", !paused); }
-async function runUserCode() { if (running) return; if (languageSelect.value !== "javascript") { log("Python execution is not implemented. Choose JavaScript; this app will not fake Python.", "error"); setStatus("JavaScript only"); return; } running=true; stopRequested=false; paused=false; stepBudget=0; commandCount=0; runStartedAt=performance.now(); runBtn.disabled=true; pauseBtn.disabled=false; stepBtn.disabled=false; setStatus("Running","running"); clearLog(); log("JavaScript controller started."); try { const factory = new Function("setJoints","setJoint","setPose","setBody","move","rotate","wait","resetPose","physics","impulse","jump","wave","walk","__line", `return (async()=>{\n${instrument(codeInput.value)}\n})();`); await factory(setJoints,setJoint,setPose,setBody,move,rotate,wait,resetPose,physics,impulse,jump,wave,walk,__line); log(`Sequence complete · ${commandCount} commands · ${Math.round(performance.now()-runStartedAt)} ms`,"ok"); setStatus("Done","done"); highlight(0); } catch(err) { if(err.message === "Stopped") { log(`Stopped after ${commandCount} commands.`,"error"); setStatus("Ready"); } else { highlight(activeLine,true); log(`Error on line ${activeLine || "?"}: ${err.message || err}`,"error"); log("Suggestion: check the command name, joint name, angle, or duration.","error"); setStatus("Script error"); } } finally { running=false; paused=false; stepBudget=0; runBtn.disabled=false; pauseBtn.disabled=true; stepBtn.disabled=true; syncPause(); } }
+async function runUserCode() {
+  if (running) return;
+  running=true; stopRequested=false; paused=false; stepBudget=0; commandCount=0; runStartedAt=performance.now();
+  runBtn.disabled=true; pauseBtn.disabled=false; stepBtn.disabled=false; setStatus("Running","running"); clearLog();
+  const mode = languageSelect.value;
+  log(`${mode === "python" ? "Python" : "JavaScript"} controller started.`);
+  try {
+    let source = codeInput.value;
+    if (mode === "python") source = translatePython(source).source;
+    const factory = new Function("setJoints","setJoint","setPose","setBody","move","rotate","wait","resetPose","physics","impulse","jump","wave","walk","__line", `return (async()=>{\n${mode === "python" ? source : instrument(source)}\n})();`);
+    await factory(setJoints,setJoint,setPose,setBody,move,rotate,wait,resetPose,physics,impulse,jump,wave,walk,__line);
+    log(`Sequence complete · ${commandCount} commands · ${Math.round(performance.now()-runStartedAt)} ms`,"ok"); setStatus("Done","done"); highlight(0);
+  } catch(err) {
+    if(err.message === "Stopped") { log(`Stopped after ${commandCount} commands.`,"error"); setStatus("Ready"); }
+    else { highlight(activeLine,true); log(`Error on line ${activeLine || "?"}: ${err.message || err}`,"error"); log("Python supports command lines, dictionaries, comments, and simple range loops.","error"); setStatus("Script error"); }
+  } finally { running=false; paused=false; stepBudget=0; runBtn.disabled=false; pauseBtn.disabled=true; stepBtn.disabled=true; syncPause(); }
+}
+
 runBtn.addEventListener("click",runUserCode); pauseBtn.addEventListener("click",()=>{if(!running)return; paused=!paused; syncPause(); setStatus(paused?"Paused":"Running","running"); log(paused?"Playback paused.":"Playback resumed.");}); stepBtn.addEventListener("click",()=>{if(!running||!paused)return; stepBudget=1; paused=false; syncPause(); log("Stepping one command.");}); stopBtn.addEventListener("click",()=>{if(running){stopRequested=true;paused=false;setStatus("Stopping","running");}}); resetBtn.addEventListener("click",async()=>{stopRequested=true;paused=false;await new Promise(r=>setTimeout(r,0));stopRequested=false;try{await resetPose(250);}catch(_){} highlight(0);setStatus("Ready");log("Pose reset.","ok");});
 codeInput.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){e.preventDefault();runUserCode();}if(e.key==="Tab"){e.preventDefault();const s=codeInput.selectionStart;codeInput.value=codeInput.value.slice(0,s)+"  "+codeInput.value.slice(codeInput.selectionEnd);codeInput.selectionStart=codeInput.selectionEnd=s+2;updateGutter();}}); codeInput.addEventListener("input",updateGutter);
-const PRESETS = { wave:`// WAVE HELLO\nawait wave();\nawait resetPose(300);`, jump:`// JUMP\nawait jump();\nawait resetPose(300);`, combo:`// COMBO\nawait wave();\nawait wait(500);\nawait jump();\nawait resetPose(300);`, loop:`// LOOPED WAVES\nfor(let i=0;i<3;i++){ await wave(); }\nawait resetPose(300);`, walk:`// WALK\nawait walk();\nawait resetPose(300);` };
-const presetSelect=document.getElementById("presetSelect"); document.getElementById("loadPresetBtn").addEventListener("click",()=>{const key=presetSelect.value;if(PRESETS[key]){codeInput.value=PRESETS[key];updateGutter();codeInput.focus();log("Example loaded.");}}); document.querySelectorAll(".insert-chip").forEach(chip=>chip.addEventListener("click",()=>{const s=codeInput.selectionStart, snippet=chip.dataset.snippet;codeInput.value=codeInput.value.slice(0,s)+snippet+codeInput.value.slice(codeInput.selectionEnd);codeInput.selectionStart=codeInput.selectionEnd=s+snippet.length;updateGutter();codeInput.focus();})); languageSelect.addEventListener("change",()=>log(languageSelect.value==="python"?"Python is display-only; choose JavaScript for real execution.":"JavaScript mode selected.",languageSelect.value==="python"?"error":"")); const CODE_DEMOS = {
+const PRESETS = {
+  javascript: { wave:`// WAVE HELLO\nawait wave();\nawait resetPose(300);`, jump:`// JUMP\nawait jump();\nawait resetPose(300);`, combo:`// COMBO\nawait wave();\nawait wait(500);\nawait jump();\nawait resetPose(300);`, loop:`// LOOPED WAVES\nfor(let i=0;i<3;i++){ await wave(); }\nawait resetPose(300);`, walk:`// WALK\nawait walk();\nawait resetPose(300);` },
+  python: { wave:`# WAVE HELLO\nwave()\nreset_pose(300)`, jump:`# JUMP\njump()\nreset_pose(300)`, combo:`# COMBO\nwave()\nwait(500)\njump()\nreset_pose(300)`, loop:`# LOOPED WAVES\nfor i in range(3):\n  wave()\nreset_pose(300)`, walk:`# WALK\nwalk()\nreset_pose(300)` }
+};
+const PYTHON_SNIPPETS = [
+  `set_joints({"rightShoulder": -120}, 300)`, `set_body({"y": -60}, 300)`, `wait(300)`, `physics({"gravity": 0.18, "bounce": 0.42})`
+];
+const presetSelect=document.getElementById("presetSelect");
+function syncLanguageUI(loadPreset = false) {
+  const python = languageSelect.value === "python";
+  document.querySelector('.code-panel').classList.toggle('python-mode', python);
+  document.querySelectorAll('.insert-chip').forEach((chip, index) => { chip.dataset.snippet = python ? PYTHON_SNIPPETS[index] : [
+    `await setJoints({ rightShoulder: -120 }, 300);`, `await setBody({ y: -60 }, 300);`, `await wait(300);`, `physics({ gravity: 0.18, bounce: 0.42 });`
+  ][index]; });
+  if (loadPreset) { const key=presetSelect.value; codeInput.value=PRESETS[languageSelect.value][key]; updateGutter(); }
+  log(python ? "Python mode connected. Type commands and press Run code." : "JavaScript mode selected.");
+}
+document.getElementById("loadPresetBtn").addEventListener("click",()=>{ const key=presetSelect.value; codeInput.value=PRESETS[languageSelect.value][key]; updateGutter(); codeInput.focus(); log(`${languageSelect.value === "python" ? "Python" : "JavaScript"} example loaded.`); });
+document.querySelectorAll(".insert-chip").forEach(chip=>chip.addEventListener("click",()=>{ const s=codeInput.selectionStart, snippet=chip.dataset.snippet; codeInput.value=codeInput.value.slice(0,s)+snippet+codeInput.value.slice(codeInput.selectionEnd); codeInput.selectionStart=codeInput.selectionEnd=s+snippet.length; updateGutter(); codeInput.focus(); }));
+languageSelect.addEventListener("change",()=>syncLanguageUI(true));
+const CODE_DEMOS = {
   individual: `// MOVE INDIVIDUAL JOINTS
 await setJoint("rightShoulder", -120, 400);
 await setJoint("rightElbow", 35, 300);
@@ -162,5 +231,5 @@ function setCodeHelp(open) { codeHelpPanel.hidden = !open; codeHelpBtn.setAttrib
 codeHelpBtn.addEventListener("click", () => setCodeHelp(codeHelpPanel.hidden));
 closeCodeHelpBtn.addEventListener("click", () => setCodeHelp(false));
 document.querySelectorAll(".use-demo-btn").forEach((button) => button.addEventListener("click", () => { const demo = CODE_DEMOS[button.dataset.demo]; if (!demo) return; codeInput.value = demo; updateGutter(); codeInput.focus(); setCodeHelp(false); log("Code help demo loaded into the editor.", "ok"); }));
-codeInput.value=PRESETS.wave;updateGutter();syncPause();pauseBtn.disabled=true;stepBtn.disabled=true;log("Ready. JavaScript runs locally in this tab.");
+codeInput.value=PRESETS.javascript.wave;updateGutter();syncPause();pauseBtn.disabled=true;stepBtn.disabled=true;log("Ready. Choose JavaScript or Python mode; both run locally in this tab.");
 window.RigLab={setJoint,setPose,setBody,wait,move,rotate,jump,wave,walk,resetPose,physics,runUserCode};
