@@ -25,7 +25,7 @@
         </div>
       </div>
       <p class="tagline">Make a character move with a few lines of code!</p>
-      <div class="header-actions"><button id="themeToggle" class="theme-toggle" type="button"
+      <div class="header-actions"><div class="mode-switch" role="tablist" aria-label="Workspace mode"><button id="freePlayMode" class="mode-tab is-active" type="button" role="tab" aria-selected="true">Free Play</button><button id="learningMode" class="mode-tab" type="button" role="tab" aria-selected="false">Learning</button></div><button id="themeToggle" class="theme-toggle" type="button"
           aria-label="Switch to dark theme"><span class="theme-icon">☾</span><span id="themeLabel">Dark
             mode</span></button>
         <div class="topbar-badge"><span class="live-dot"></span> Browser-only · no setup</div>
@@ -52,7 +52,7 @@
         </div>
         <div class="stage-toolbar">
           <div class="button-group">
-            <button id="runBtn" class="btn btn-primary"><span class="play-icon">▶</span> Run code <kbd>⌘↵</kbd></button>
+            <button id="runBtn" class="btn btn-primary"><span class="play-icon">▶</span> Run code <kbd>⌘↵ / F6</kbd></button>
             <button id="pauseBtn" class="btn btn-quiet" disabled>Pause</button>
             <button id="stepBtn" class="btn btn-quiet" disabled>Step</button>
             <button id="stopBtn" class="btn btn-quiet">Stop</button>
@@ -72,6 +72,12 @@
       </section>
 
       <section class="code-panel panel">
+        <div class="learning-shell" id="learningShell" hidden>
+          <div class="learning-topline"><div><div class="eyebrow">LEARNING MODE</div><h2 id="learningTitle">Move a joint</h2></div><div class="learning-progress"><span id="learningProgressText">1 / 5</span><div class="learning-progress-track"><span id="learningProgressFill"></span></div></div></div>
+          <p class="learning-explanation" id="learningExplanation"></p>
+          <div class="learning-task"><span class="learning-task-label">YOUR TASK</span><span id="learningTask"></span></div>
+          <div class="learning-editor-label"><span>Write, run, observe, then modify.</span><kbd>⌘/Ctrl + Enter</kbd></div>
+        </div>
         <div class="section-heading code-heading">
           <div>
             <div class="eyebrow">THE SCRIPT</div>
@@ -107,6 +113,13 @@
           <button class="insert-chip" data-snippet="await wait(300);">wait</button>
           <button class="insert-chip physics-chip"
             data-snippet="physics({ gravity: 0.18, bounce: 0.42 });">physics</button>
+        </div>
+        <div class="learning-tools" id="learningTools" hidden>
+          <div class="learning-actions"><button id="learningRunBtn" class="btn btn-primary" type="button">▶ Run lesson</button><button id="learningResetBtn" class="btn btn-quiet" type="button">Reset</button><button id="learningHintBtn" class="learning-text-btn" type="button">Show hint</button><button id="learningNextBtn" class="btn btn-small" type="button" disabled>Next challenge</button></div>
+          <div class="learning-feedback" id="learningFeedback" aria-live="polite"><span class="feedback-dot"></span><span id="learningFeedbackText">Run your code to test the rig.</span></div>
+          <div class="learning-trace" id="learningTrace"><div class="learning-trace-head"><span>CODE → MOTION</span><span id="learningTraceCount">0 commands</span></div><div id="learningTraceList"><span class="learning-trace-empty">Your commands will appear here as the rig moves.</span></div></div>
+          <div class="learning-what"><div class="learning-what-head">WHAT HAPPENED?</div><p id="learningWhatText">Run the lesson to see how your code changed the rig.</p></div>
+          <details class="learning-reference"><summary>Relevant commands</summary><div id="learningReferenceText"></div></details>
         </div>
         <div class="timeline-panel">
           <div class="timeline-head"><span>POSE TIMELINE</span><span id="keyframeCount">0 keyframes</span></div>
@@ -174,10 +187,10 @@ await resetPose(400);</code></pre><button class="use-demo-btn" data-demo="body">
           browser.</div>
       </section>
     </main>
-    <footer class="site-footer"><span>RIG LAB / Made by Debangshu</span><span>Built for curious makers · 13 joints,
+    <footer class="site-footer"><span>RIG LAB / Made by Debangshu</span><span>Built for curious minds · 13 joints,
         infinite poses!</span></footer>
   </div>
-  <script src="script.js"></script>
+  <script src="script.js?v=learning-layer-2"></script>
 </body>
 
 </html>
